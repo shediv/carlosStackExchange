@@ -8,7 +8,8 @@ var express = require('express'),
     session = require('express-session'),
     bodyParser = require('body-parser'),
     cookieParser = require('cookie-parser');
-var request = require('request');
+const request = require('request-promise');
+const zlib = require('zlib');
 
 
 /**
@@ -79,16 +80,78 @@ app.get('/', function(req, res){
     res.render('index', { user: req.user });
 });
 
-app.get('/account', ensureAuthenticated, function(req, res){
-    res.render('account', { user: req.user });
-    // var user = req.user;
+app.post('/account', ensureAuthenticated, function(req, res){
+    //res.render('account', { user: req.user });
+    var user = req.user;
+    var requestOptions,
+        requestCall,
+        wiki,
+        buffer,
+        gunzip;
+
+    requestOptions = {
+        url: 'http://api.stackexchange.com/2.2/users/'+req.user.id+'?order=desc&sort=reputation&site=stackoverflow'
+    };
+    requestCall = request(requestOptions);
+
+    requestCall.on('response', function (wikiRequest) {
+        if (wikiRequest.statusCode === 200) {
+            buffer = [];
+            gunzip = zlib.createGunzip();
+            wikiRequest.pipe(gunzip);
+            gunzip.on('data', function (data) {
+                // decompression chunk ready, add it to the buffer
+                buffer.push(data.toString());
+            }).on("end", function () {
+                // response and decompression complete, join the buffer and return
+                wiki = JSON.parse(buffer.join(''));
+                //console.log(" wiki = ", wiki);
+                req.user.details = wiki.items[0];
+                req.user.email = req.body.email;
+                return res.render('account', { user: req.user });
+            })
+        }
+    })
+
+});
+
+app.post('/account2', function(req, res){
+    console.log("fname =", req.body.fname);
+
+
+
+    //Working .....................
+    // var requestOptions = {
+    //     url: 'https://api.stackexchange.com/2.2/users/4777609?order=desc&sort=reputation&site=stackoverflow'
+    // };
     //
-    // request.get({
-    //     url:'http://api.stackexchange.com/2.2/users/'+req.user.id+'?order=desc&sort=reputation&site=stackoverflow',
-    // }, function(error, response){
-    //     //console.log(response.user._raw.items[0].badge_counts.reputation);
-    //     console.log(response);
-    // });
+    // var req = request(requestOptions);
+    //
+    // req.on('response', function (wikiRequest) {
+    //     var wiki;
+    //     var buffer;
+    //     var gunzip;
+    //
+    //     if (wikiRequest.statusCode === 200) {
+    //         buffer = [];
+    //         gunzip = zlib.createGunzip();
+    //
+    //         wikiRequest.pipe(gunzip);
+    //
+    //         gunzip.on('data', function (data) {
+    //             // decompression chunk ready, add it to the buffer
+    //             buffer.push(data.toString());
+    //
+    //         }).on("end", function () {
+    //             // response and decompression complete, join the buffer and return
+    //             wiki = JSON.parse(buffer.join(''));
+    //             console.log(" wiki = ", wiki);
+    //         })
+    //     }
+    // })
+
+
+
 
 });
 

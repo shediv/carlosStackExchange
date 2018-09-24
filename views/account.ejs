@@ -1,9 +1,19 @@
 <p>
   <a href="/logout">Logout</a>
 </p>
-
+<p>Hello <%= user.displayName %>! We are glad to have you onboard.</p>
+<h4>Your details are : </h4>
 <p>ID: <%= user.id %></p>
 <p>Name: <%= user.displayName %></p>
+<p>Email Adress: <%= user.email %></p>
+<p>Reputation Score:<%= user.details.reputation %></p>
+<br>
+<b>Badge Counts</b>
+<span>
+  <p>Bronze : <%= user.details.badge_counts.bronze %></p>
+  <p>Silver : <%= user.details.badge_counts.silver %></p>
+  <p>Gold : <%= user.details.badge_counts.gold %></p>
+</span>
 <p>Profile Page: <%= user.profileUrl %></p>
 <p>
   Profile Picture:<br>

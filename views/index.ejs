@@ -5,7 +5,18 @@
 </p>
 <% } else { %>
 <h2>Hello, <%= user.displayName %>.</h2>
-<p>
-  <a href="/account">Go to account page.</a>
-</p>
+<!--<p>-->
+  <!--<a href="/account">Go to account page.</a>-->
+<!--</p>-->
+<form name="form1" method="POST" action="/account">
+  <table>
+    <tr>
+      <td>Email Address</td>
+      <td><input type="email" name="email"></td>
+    </tr>
+    <tr>
+      <td colspan="2"><input type="submit" value="Go to account page." ></td>
+    </tr>
+  </table>
+</form>
 <% } %>
